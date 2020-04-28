@@ -324,7 +324,7 @@ class OutstationApplication(opendnp3.IOutstationApplication):
         :param value: An instance of Analog, Binary, or another opendnp3 data value.
         :param index: (integer) Index of the data definition in the opendnp3 database.
         """
-        breakpoint()
+        #breakpoint()
         _log.debug('Recording {} measurement, index={}, value={}'.format(type(value).__name__, index, value.value))
         builder = asiodnp3.UpdateBuilder()
         builder.Update(value, index)
@@ -334,11 +334,13 @@ class OutstationApplication(opendnp3.IOutstationApplication):
     def pika_on_message_callback(self, channel, method, properties, body):
         _log.debug('Message Received')
         body_text = body.decode(encoding='UTF-8')
+        _log.debug(f'{body_text}')
         consumer_tag_info = method.consumer_tag.split("-")
         #breakpoint()
         for station in self.config.outstations:
             for point in station.points.analogs:
                 if point.message_source_id == int(consumer_tag_info[0]) and point.message_topic_id == int(consumer_tag_info[1]):
+                    #breakpoint()
                     topic = next(t for t in \
                             next(f for f in self.config.message_sources \
                                 if f.message_source_id==point.message_source_id).topics 
@@ -346,8 +348,9 @@ class OutstationApplication(opendnp3.IOutstationApplication):
 
                     if topic.source_message_type == "xml":
                         value = self.processXml(body_text, point.point_path)
-                        if point.point_type == "analog":
-                            breakpoint()
+                        #breakpoint()
+                        if point.point_type == "analog" or point.point_type == "float" :
+                            #breakpoint()
                             self.apply_update(opendnp3.Analog(float(value[0])), station.outstation_id, point.point_id)
                     else:
                         assert(False)
@@ -380,7 +383,7 @@ class OutstationApplication(opendnp3.IOutstationApplication):
 
                 for topic in connection_source.topics:
 
-                    result = channel.queue_declare(queue='')
+                    result = channel.queue_declare(queue='', exclusive=True)
                     _log.debug(f'Queue name {result.method.queue}')
 
                     channel.queue_bind(exchange=topic.name,

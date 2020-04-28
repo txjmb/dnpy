@@ -18,56 +18,56 @@ outstations:
       analogs:
         - point_id: 1
           desc: Bias
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1 # should be in the form of "message_source_id-topic", like "1-opstrat_ems_files"
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/Bias/text()
         - point_id: 2
           desc: RegUp_Award
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/RegUp_Award/text()
         - point_id: 3
           desc: RegDown_Award
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/RegDown_Award/text()
         - point_id: 4
           desc: Spin_Award
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/Spin_Award/text()
         - point_id: 5
           desc: NonSpin_Award
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/NonSpin_Award/text()
         - point_id: 6
           desc: NextBP_CLR
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/NextBP_CLR/text()
         - point_id: 7
           desc: NextBP_GEN
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/NextBP_GEN/text()
         - point_id: 8
           desc: StartSOC
-          point_type: analog
+          point_type: float
           scaling: 1
           message_source_id: 1
           message_topic_id: 1
