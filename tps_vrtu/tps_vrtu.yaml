@@ -72,5 +72,3 @@ outstations:
           message_source_id: 1
           message_topic_id: 1
           point_path: /BatteryInfo/ResourceInfo[Name="ABLE_1"]/StartSOC/text()
-
-    
