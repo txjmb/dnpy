@@ -2,7 +2,7 @@
     The master uses these data-type-specific Visitor class definitions
     when it processes measurements received from the outstation.
 """
-from pydnp3 import opendnp3
+from cppyy.gbl import opendnp3
 
 
 class VisitorIndexedBinary(opendnp3.IVisitorIndexedBinary):
