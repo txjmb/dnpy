@@ -1,3 +1,6 @@
+##  This code does not currently work due to Template-related issues with Cppyy.  This is probably not an Cppyy issue specifically, but needs to be solved before this can work.
+
+
 """
     The master uses these data-type-specific Visitor class definitions
     when it processes measurements received from the outstation.

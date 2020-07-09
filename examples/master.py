@@ -176,45 +176,49 @@ class MyMaster:
         del self.channel
         self.manager.Shutdown()
 
-class SOEHandler(opendnp3.ISOEHandler):
-    """
-        Override ISOEHandler in this manner to implement application-specific sequence-of-events behavior.
+'''
+SOEHandler does not currently work due to some issues with nested templates and Cppyy.  This is probably solvable with some help from Cppyy devs.
+'''
 
-        This is an interface for SequenceOfEvents (SOE) callbacks from the Master stack to the application layer.
-    """
+# class SOEHandler(opendnp3.ISOEHandler):
+#     """
+#         Override ISOEHandler in this manner to implement application-specific sequence-of-events behavior.
 
-    def __init__(self):
-        super(SOEHandler, self).__init__()
+#         This is an interface for SequenceOfEvents (SOE) callbacks from the Master stack to the application layer.
+#     """
 
-    def Process(self, info, values):
-        """
-            Process measurement data.
+#     def __init__(self):
+#         super(SOEHandler, self).__init__()
 
-        :param info: HeaderInfo
-        :param values: A collection of values received from the Outstation (various data types are possible).
-        """
-        visitor_class_types = {
-            ICollection(Indexed(Binary)): VisitorIndexedBinary,
-            opendnp3.ICollectionIndexedDoubleBitBinary: VisitorIndexedDoubleBitBinary,
-            opendnp3.ICollectionIndexedCounter: VisitorIndexedCounter,
-            opendnp3.ICollectionIndexedFrozenCounter: VisitorIndexedFrozenCounter,
-            opendnp3.ICollectionIndexedAnalog: VisitorIndexedAnalog,
-            opendnp3.ICollectionIndexedBinaryOutputStatus: VisitorIndexedBinaryOutputStatus,
-            opendnp3.ICollectionIndexedAnalogOutputStatus: VisitorIndexedAnalogOutputStatus,
-            opendnp3.ICollectionIndexedTimeAndInterval: VisitorIndexedTimeAndInterval
-        }
-        visitor_class = visitor_class_types[type(values)]
-        visitor = visitor_class()
-        values.Foreach(visitor)
-        for index, value in visitor.index_and_value:
-            log_string = 'SOEHandler.Process {0}\theaderIndex={1}\tdata_type={2}\tindex={3}\tvalue={4}'
-            _log.debug(log_string.format(info.gv, info.headerIndex, type(values).__name__, index, value))
+#     def Process(self, info, values):
+#         """
+#             Process measurement data.
 
-    def BeginFragment(self):
-        _log.debug('In SOEHandler.BeginFragment')
+#         :param info: HeaderInfo
+#         :param values: A collection of values received from the Outstation (various data types are possible).
+#         """
+#         visitor_class_types = {
+#             ICollection(Indexed(Binary)): VisitorIndexedBinary,
+#             opendnp3.ICollectionIndexedDoubleBitBinary: VisitorIndexedDoubleBitBinary,
+#             opendnp3.ICollectionIndexedCounter: VisitorIndexedCounter,
+#             opendnp3.ICollectionIndexedFrozenCounter: VisitorIndexedFrozenCounter,
+#             opendnp3.ICollectionIndexedAnalog: VisitorIndexedAnalog,
+#             opendnp3.ICollectionIndexedBinaryOutputStatus: VisitorIndexedBinaryOutputStatus,
+#             opendnp3.ICollectionIndexedAnalogOutputStatus: VisitorIndexedAnalogOutputStatus,
+#             opendnp3.ICollectionIndexedTimeAndInterval: VisitorIndexedTimeAndInterval
+#         }
+#         visitor_class = visitor_class_types[type(values)]
+#         visitor = visitor_class()
+#         values.Foreach(visitor)
+#         for index, value in visitor.index_and_value:
+#             log_string = 'SOEHandler.Process {0}\theaderIndex={1}\tdata_type={2}\tindex={3}\tvalue={4}'
+#             _log.debug(log_string.format(info.gv, info.headerIndex, type(values).__name__, index, value))
 
-    def EndFragment(self):
-        _log.debug('In SOEHandler.EndFragment')
+#     def BeginFragment(self):
+#         _log.debug('In SOEHandler.BeginFragment')
+
+#     def EndFragment(self):
+#         _log.debug('In SOEHandler.EndFragment')
 
 
 class MyLogger(ILogHandler):
@@ -241,10 +245,10 @@ class AppChannelListener(IChannelListener):
         _log.debug('In AppChannelListener.OnStateChange: state={}'.format(opendnp3.ChannelStateToString(state)))
 
     def Start(self):
-        _log.debug('In SOEHandler.Start')
+        _log.debug('In AppChannelListener.Start')
 
     def End(self):
-        _log.debug('In SOEHandler.End')
+        _log.debug('In AppChannelListener.End')
 
 
 class MasterApplication(IMasterApplication):
@@ -314,7 +318,7 @@ def main():
     # app = MyMaster()
     app = MyMaster(#log_handler=MyLogger(), # This is currently broken.  Not sure why at this point.
                    listener=AppChannelListener(),
-                   soe_handler=SOEHandler(),
+                   #soe_handler=SOEHandler(), # This is currently broken for reasons highlighted above.
                    master_application=MasterApplication()
                    )
     _log.debug('Initialization complete. In command loop.')
