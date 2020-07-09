@@ -3,7 +3,8 @@ import logging
 import sys
 
 from datetime import datetime
-from pydnp3 import opendnp3, openpal
+import cppyy
+import setup_cppyy
 from master import MyMaster, MyLogger, AppChannelListener, SOEHandler, MasterApplication
 from master import command_callback, restart_callback
 

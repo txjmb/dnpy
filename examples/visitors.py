@@ -2,10 +2,16 @@
     The master uses these data-type-specific Visitor class definitions
     when it processes measurements received from the outstation.
 """
+import cppyy
+import setup_cppyy
 from cppyy.gbl import opendnp3
+from cppyy.gbl.opendnp3 import (
+    IVisitor,
+    Indexed,
+    Binary
+)
 
-
-class VisitorIndexedBinary(opendnp3.IVisitorIndexedBinary):
+class VisitorIndexedBinary(IVisitor['opendnp3::Indexed<''opendnp3::Binary''>']):
     def __init__(self):
         super(VisitorIndexedBinary, self).__init__()
         self.index_and_value = []

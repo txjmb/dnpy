@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/mbohan/source/pyod3/build",
-  "command": "/usr/bin/x86_64-linux-gnu-g++-9    -fvisibility-inlines-hidden -std=c++17 -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /home/mbohan/anaconda3/include -g   -o CMakeFiles/dnpy.dir/dnpy.cpp.o -c /home/mbohan/source/pyod3/dnpy.cpp",
-  "file": "/home/mbohan/source/pyod3/dnpy.cpp"
-}
-]

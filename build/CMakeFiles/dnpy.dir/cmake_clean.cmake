@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/dnpy.dir/dnpy.cpp.o"
-  "libdnpy.pdb"
   "libdnpy.a"
+  "libdnpy.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

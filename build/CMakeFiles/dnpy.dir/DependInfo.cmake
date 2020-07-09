@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/mbohan/source/pyod3/dnpy.cpp" "/home/mbohan/source/pyod3/build/CMakeFiles/dnpy.dir/dnpy.cpp.o"
+  "/home/mbohan/source/dnpy/dnpy.cpp" "/home/mbohan/source/dnpy/build/CMakeFiles/dnpy.dir/dnpy.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

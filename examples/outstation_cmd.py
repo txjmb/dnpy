@@ -1,8 +1,9 @@
 import cmd
 import logging
 import sys
-
-from pydnp3 import opendnp3
+import cppyy
+import setup_cppyy
+from cppyy.gbl import opendnp3
 
 from outstation import OutstationApplication
 

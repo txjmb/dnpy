@@ -40,10 +40,14 @@ from cppyy.gbl.opendnp3 import (
     PrintingCommandResultCallback,
     IChannelListener,
     LogLevels,
-    ILogHandler
+    ILogHandler,
+    UTCTimestamp,
+    IMasterApplication,
+    ICollection,
+    Indexed
     )
 
-#from visitors import *
+from visitors import *
 
 FILTERS = levels.NORMAL | levels.ALL_APP_COMMS
 HOST = "127.0.0.1"
@@ -56,39 +60,6 @@ stdout_stream.setFormatter(logging.Formatter('%(asctime)s\t%(name)s\t%(levelname
 _log = logging.getLogger(__name__)
 _log.addHandler(stdout_stream)
 _log.setLevel(logging.DEBUG)
-
-class TestSOEHandler(ISOEHandler):
-    def __init__(self):
-        super(TestSOEHandler, self).__init__()
-
-    def BeginFragment(self, info: ResponseInfo):
-        return
-    def EndFragment(self, info: ResponseInfo):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(Binary))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(DoubleBitBinary))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(Analog))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(Counter))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(FrozenCounter))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(BinaryOutputStatus))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(AnalogOutputStatus))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(OctetString))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(TimeAndInterval))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(BinaryCommandEvent))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(Indexed(AnalogCommandEvent))):
-        return
-    def Process(self, info: HeaderInfo, values: ICollection(DNPTime)):
-        return
 
 class MyMaster:
     """
@@ -109,21 +80,25 @@ class MyMaster:
                 - Either precise times of transmission or the ability to set time values
                   into outgoing messages.
     """
-    def __init__(self):
-                 
-        #log_handler=asiodnp3.ConsoleLogger(False).Create() 
-        #listener=asiodnp3.PrintingChannelListener().Create()
-        #soe_handler=asiodnp3.PrintingSOEHandler().Create()
-        #master_application=asiodnp3.DefaultMasterApplication().Create()
+    def __init__(self,
+                 log_handler=ConsoleLogger(False).Create(),
+                 listener=PrintingChannelListener().Create(),
+                 soe_handler=PrintingSOEHandler().Create(),
+                 master_application=DefaultMasterApplication().Create(),
+                 stack_config=None):
 
         threads_to_allocate = 1
+        self.log_handler = log_handler
+        self.master_application = master_application
+        self.listener = listener
+        self.soe_handler = soe_handler
 
         _log.debug('Creating a DNP3Manager.')
-        self.log_handler = ConsoleLogger.Create()
         self.manager = DNP3Manager(threads_to_allocate, self.log_handler)
         _log.debug('Creating the DNP3 channel, a TCP client.')
         self.channel = self.manager.AddTCPClient("tcpClient", FILTERS, ChannelRetry.Default(), {IPEndpoint("127.0.0.1", 20000)}, "0.0.0.0", PrintingChannelListener.Create())
-
+        
+        self.master_application = master_application
         _log.debug('Configuring the DNP3 stack.')
         
         self.stack_config = MasterStackConfig()
@@ -132,38 +107,21 @@ class MyMaster:
         self.stack_config.link.RemoteAddr = 1
 
         _log.debug('Adding the master to the channel.')
-        #breakpoint()
+
         self.master = self.channel.AddMaster("master",
-                                   PrintingSOEHandler.Create(),
-                                   DefaultMasterApplication.Create(),
+                                   self.soe_handler,
+                                   self.master_application,
                                    self.stack_config)
 
-        # self.soe_handler = TestSoe
-
         _log.debug('Configuring some scans (periodic reads).')
-        # Set up a "slow scan", an infrequent integrity poll that requests events and static data for all classes.
-        # self.slow_scan = self.master.AddClassScan(opendnp3.ClassField().AllClasses(),
-        #                                           openpal.TimeDuration().Minutes(30),
-        #                                           opendnp3.TaskConfig().Default())
-        # Set up a "fast scan", a relatively-frequent exception poll that requests events and class 1 static data.
-        
-        test_soe_hander = TestSOEHandler()
 
-        #breakpoint()
-        self.integrity_scan = self.master.AddClassScan(ClassField.AllClasses(), TimeDuration.Minutes(1), test_soe_hander)
+        self.integrity_scan = self.master.AddClassScan(ClassField.AllClasses(), TimeDuration.Minutes(1), self.soe_handler)
 
-        self.exception_scan = self.master.AddClassScan(ClassField(ClassField.CLASS_1), TimeDuration.Seconds(5), test_soe_hander)
-
-
-        # self.channelCommsLoggingEnabled = True
-        # self.masterCommsLoggingEnabled = True
-
-        # self.channel.SetLogFilters(LogLevels(opendnp3.levels.ALL_APP_COMMS))
-        # self.master.SetLogFilters(LogLevels(opendnp3.levels.ALL_APP_COMMS))
+        self.exception_scan = self.master.AddClassScan(ClassField(ClassField.CLASS_1), TimeDuration.Seconds(5), self.soe_handler)
 
         _log.debug('Enabling the master. At this point, traffic will start to flow between the Master and Outstations.')
         self.master.Enable()
-        time.sleep(20)
+        time.sleep(5)
 
     def send_direct_operate_command(self, command, index, callback=PrintingCommandResultCallback.Get(),
                                     config=opendnp3.TaskConfig.Default()):
@@ -218,6 +176,46 @@ class MyMaster:
         del self.channel
         self.manager.Shutdown()
 
+class SOEHandler(opendnp3.ISOEHandler):
+    """
+        Override ISOEHandler in this manner to implement application-specific sequence-of-events behavior.
+
+        This is an interface for SequenceOfEvents (SOE) callbacks from the Master stack to the application layer.
+    """
+
+    def __init__(self):
+        super(SOEHandler, self).__init__()
+
+    def Process(self, info, values):
+        """
+            Process measurement data.
+
+        :param info: HeaderInfo
+        :param values: A collection of values received from the Outstation (various data types are possible).
+        """
+        visitor_class_types = {
+            ICollection(Indexed(Binary)): VisitorIndexedBinary,
+            opendnp3.ICollectionIndexedDoubleBitBinary: VisitorIndexedDoubleBitBinary,
+            opendnp3.ICollectionIndexedCounter: VisitorIndexedCounter,
+            opendnp3.ICollectionIndexedFrozenCounter: VisitorIndexedFrozenCounter,
+            opendnp3.ICollectionIndexedAnalog: VisitorIndexedAnalog,
+            opendnp3.ICollectionIndexedBinaryOutputStatus: VisitorIndexedBinaryOutputStatus,
+            opendnp3.ICollectionIndexedAnalogOutputStatus: VisitorIndexedAnalogOutputStatus,
+            opendnp3.ICollectionIndexedTimeAndInterval: VisitorIndexedTimeAndInterval
+        }
+        visitor_class = visitor_class_types[type(values)]
+        visitor = visitor_class()
+        values.Foreach(visitor)
+        for index, value in visitor.index_and_value:
+            log_string = 'SOEHandler.Process {0}\theaderIndex={1}\tdata_type={2}\tindex={3}\tvalue={4}'
+            _log.debug(log_string.format(info.gv, info.headerIndex, type(values).__name__, index, value))
+
+    def BeginFragment(self):
+        _log.debug('In SOEHandler.BeginFragment')
+
+    def EndFragment(self):
+        _log.debug('In SOEHandler.EndFragment')
+
 
 class MyLogger(ILogHandler):
     """
@@ -227,14 +225,9 @@ class MyLogger(ILogHandler):
     def __init__(self):
         super(MyLogger, self).__init__()
 
-    def Log(self, entry):
-        #flag = opendnp3.LogFlagToString(entry.filters.GetBitfield())
-        #filters = entry.filters.GetBitfield()
-        print(foo)
-        #location = entry.location.rsplit('/')[-1] if entry.location else ''
-        #message = entry.message
-        #_log.debug('LOG\tfilters={:<5}\tlocation={:<25}\tentry={}'.format(filters, location, message))
-
+    def log(self, module, id, level, location, message):
+        pass
+        #_log.debug('LOG\tentry={}'.format(message))
 
 class AppChannelListener(IChannelListener):
     """
@@ -254,7 +247,7 @@ class AppChannelListener(IChannelListener):
         _log.debug('In SOEHandler.End')
 
 
-class MasterApplication(opendnp3.IMasterApplication):
+class MasterApplication(IMasterApplication):
     def __init__(self):
         super(MasterApplication, self).__init__()
 
@@ -278,6 +271,11 @@ class MasterApplication(opendnp3.IMasterApplication):
     # Overridden method
     def OnTaskComplete(self, info):
         _log.debug('In MasterApplication.OnTaskComplete')
+
+    def Now(self):
+        _log.debug('In MasterApplication.Now')
+
+        return UTCTimestamp()
 
     # Overridden method
     def OnTaskStart(self, type, id):
@@ -314,10 +312,10 @@ def restart_callback(result=opendnp3.RestartOperationResult()):
 def main():
     """The Master has been started from the command line. Execute ad-hoc tests if desired."""
     # app = MyMaster()
-    app = MyMaster(#log_handler=MyLogger(),
-                   #listener=AppChannelListener(),
-                   #soe_handler=SOEHandler(),
-                   #master_application=MasterApplication()
+    app = MyMaster(#log_handler=MyLogger(), # This is currently broken.  Not sure why at this point.
+                   listener=AppChannelListener(),
+                   soe_handler=SOEHandler(),
+                   master_application=MasterApplication()
                    )
     _log.debug('Initialization complete. In command loop.')
     # Ad-hoc tests can be performed at this point. See master_cmd.py for examples.
