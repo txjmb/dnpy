@@ -45,6 +45,9 @@ coverage.xml
 # PyBuilder
 target/
 
+# CMake
+/build
+
 # Jupyter Notebook
 .ipynb_checkpoints
 

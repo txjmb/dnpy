@@ -1,2 +1,0 @@
-/usr/bin/ar qc libdnpy.a  CMakeFiles/dnpy.dir/dnpy.cpp.o
-/usr/bin/ranlib libdnpy.a
