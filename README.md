@@ -78,3 +78,4 @@ They are not 100% functional as of yet, although most of the basic functions hav
 * https://gitlab.com/coopr/coek/tree/cppyy
 * https://github.com/camillescott/cppyy-bbhash
 * https://bitbucket.org/wlav/cppyy/issues/76/binding-generation-issue-on-ubuntu1604
+* https://github.com/camillescott/cppyy-knn
