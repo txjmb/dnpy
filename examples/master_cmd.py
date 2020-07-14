@@ -5,8 +5,9 @@ import sys
 from datetime import datetime
 import cppyy
 import setup_cppyy
-from master import MyMaster, MyLogger, AppChannelListener, SOEHandler, MasterApplication
-from master import command_callback, restart_callback
+from cppyy.gbl import opendnp3
+from master import MyMaster, MyLogger, AppChannelListener, MasterApplication
+from master import restart_callback
 
 stdout_stream = logging.StreamHandler(sys.stdout)
 stdout_stream.setFormatter(logging.Formatter('%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s'))
@@ -27,10 +28,11 @@ class MasterCmd(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.prompt = 'master> '   # Used by the Cmd framework, displayed when issuing a command-line prompt.
-        self.application = MyMaster(log_handler=MyLogger(),
-                                    listener=AppChannelListener(),
-                                    soe_handler=SOEHandler(),
-                                    master_application=MasterApplication())
+        self.application = MyMaster(# log_handler=MyLogger(), # not yet working
+                                    #listener=AppChannelListener(),
+                                    #soe_handler=SOEHandler(),  # not yet working.
+                                    #master_application=MasterApplication()
+                                    )
 
     def startup(self):
         """Display the command-line interface's menu and issue a prompt."""
@@ -93,7 +95,7 @@ class MasterCmd(cmd.Cmd):
 
     def do_o1(self, line):
         """Send a DirectOperate BinaryOutput (group 12) index 5 LATCH_ON to the Outstation. Command syntax is: o1"""
-        self.application.send_direct_operate_command(opendnp3.ControlRelayOutputBlock(opendnp3.ControlCode.LATCH_ON),
+        self.application.send_direct_operate_command(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON),
                                                      5,
                                                      command_callback)
 
@@ -107,8 +109,8 @@ class MasterCmd(cmd.Cmd):
         """Send a DirectOperate BinaryOutput (group 12) CommandSet to the Outstation. Command syntax is: o3"""
         self.application.send_direct_operate_command_set(opendnp3.CommandSet(
             [
-                opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.ControlCode.LATCH_ON), 0),
-                opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.ControlCode.LATCH_OFF), 1)
+                opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON), 0),
+                opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_OFF), 1)
             ]),
             command_callback
         )
@@ -127,22 +129,24 @@ class MasterCmd(cmd.Cmd):
 
     def do_s1(self, line):
         """Send a SelectAndOperate BinaryOutput (group 12) index 8 LATCH_ON to the Outstation. Command syntax is: s1"""
-        self.application.send_select_and_operate_command(opendnp3.ControlRelayOutputBlock(opendnp3.ControlCode.LATCH_ON),
+        self.application.send_select_and_operate_command(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON),
                                                          8,
-                                                         command_callback)
+                                                         #opendnp3.PrintingCommandResultCallback.Get()
+                                                         self.application.command_callback
+                                                         )
 
     def do_s2(self, line):
         """Send a SelectAndOperate BinaryOutput (group 12) CommandSet to the Outstation. Command syntax is: s2"""
         self.application.send_select_and_operate_command_set(opendnp3.CommandSet(
             [
-                opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.ControlCode.LATCH_ON), 0)
+                opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON), 0)
             ]),
             command_callback
         )
 
     def do_scan_all(self, line):
         """Call ScanAllObjects. Command syntax is: scan_all"""
-        self.application.master.ScanAllObjects(opendnp3.GroupVariationID(2, 1), opendnp3.TaskConfig().Default())
+        self.application.master.ScanAllObjects(opendnp3.GroupVariationID(2, 1), self.application.soe_handler, opendnp3.TaskConfig.Default())
 
     def do_scan_fast(self, line):
         """Demand an immediate fast scan. Command syntax is: scan_fast"""

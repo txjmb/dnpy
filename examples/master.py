@@ -44,15 +44,17 @@ from cppyy.gbl.opendnp3 import (
     UTCTimestamp,
     IMasterApplication,
     ICollection,
-    Indexed
+    Indexed,
+    CommandSet,
+    ControlRelayOutputBlock,
+    TaskCompletionSpec,
+    CommandPointResult
     )
-
-from visitors import *
-
-FILTERS = levels.NORMAL | levels.ALL_APP_COMMS
+    
+FILTERS = levels.ALL | levels.ALL_APP_COMMS
 HOST = "127.0.0.1"
 LOCAL = "0.0.0.0"
-PORT = 20000
+PORT = 20005
 
 stdout_stream = logging.StreamHandler(sys.stdout)
 stdout_stream.setFormatter(logging.Formatter('%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s'))
@@ -96,7 +98,7 @@ class MyMaster:
         _log.debug('Creating a DNP3Manager.')
         self.manager = DNP3Manager(threads_to_allocate, self.log_handler)
         _log.debug('Creating the DNP3 channel, a TCP client.')
-        self.channel = self.manager.AddTCPClient("tcpClient", FILTERS, ChannelRetry.Default(), {IPEndpoint("127.0.0.1", 20000)}, "0.0.0.0", PrintingChannelListener.Create())
+        self.channel = self.manager.AddTCPClient("tcpClient", FILTERS, ChannelRetry.Default(), {IPEndpoint(HOST, PORT)}, "0.0.0.0", PrintingChannelListener.Create())
         
         self.master_application = master_application
         _log.debug('Configuring the DNP3 stack.')
@@ -113,15 +115,15 @@ class MyMaster:
                                    self.master_application,
                                    self.stack_config)
 
-        _log.debug('Configuring some scans (periodic reads).')
+        # _log.debug('Configuring some scans (periodic reads).')
 
-        self.integrity_scan = self.master.AddClassScan(ClassField.AllClasses(), TimeDuration.Minutes(1), self.soe_handler)
+        self.slow_scan = self.master.AddClassScan(ClassField.AllClasses(), TimeDuration.Minutes(30), self.soe_handler)
 
-        self.exception_scan = self.master.AddClassScan(ClassField(ClassField.CLASS_1), TimeDuration.Seconds(5), self.soe_handler)
+        self.fast_scan = self.master.AddClassScan(ClassField(ClassField.CLASS_1), TimeDuration.Minutes(1), self.soe_handler)
 
         _log.debug('Enabling the master. At this point, traffic will start to flow between the Master and Outstations.')
         self.master.Enable()
-        time.sleep(5)
+        time.sleep(1)
 
     def send_direct_operate_command(self, command, index, callback=PrintingCommandResultCallback.Get(),
                                     config=opendnp3.TaskConfig.Default()):
@@ -146,6 +148,45 @@ class MyMaster:
         """
         self.master.DirectOperate(command_set, callback, config)
 
+    @staticmethod # This will fail without this attribute!  Static method is expected.
+    def command_callback(result=None):
+        """
+        :type result: opendnp3.ICommandTaskResult
+        """
+        print("Received Callback Command Result...")
+
+        print(f"Received command result with summary: {TaskCompletionSpec.to_human_string(result.summary)}")
+
+        
+        # printDetails = lambda res: (
+        #     print(f"Header: {res.headerIndex} Index: { res.index }")
+        #)
+        #               << " State: " << CommandPointStateSpec::to_human_string(res.state)
+        #               << " Status: " << CommandStatusSpec::to_human_string(res.status);
+        # )
+        # };
+        def foo(bar):
+            print(bar.index)
+
+        mybar = foo
+        
+        result.ForeachItem[opendnp3.CommandPointResult](mybar)
+ 
+        #result.ForeachItem(collection_callback)
+
+    @staticmethod
+    def collection_callback(result=None):
+        """
+        :type result: opendnp3.CommandPointResult
+        """
+        print("foo")
+        # print("Header: {0} | Index:  {1} | State:  {2} | Status: {3}".format(
+        #     result.headerIndex,
+        #     result.index,
+        #     opendnp3.CommandPointStateToString(result.state),
+        #     opendnp3.CommandStatusToString(result.status)
+        # ))
+
     def send_select_and_operate_command(self, command, index, callback=PrintingCommandResultCallback.Get(),
                                         config=opendnp3.TaskConfig.Default()):
         """
@@ -156,7 +197,9 @@ class MyMaster:
         :param callback: callback that will be invoked upon completion or failure
         :param config: optional configuration that controls normal callbacks and allows the user to be specified for SA
         """
-        self.master.SelectAndOperate(command, index, callback, config)
+        _log.debug("Selecting and operating...")
+        self.master.SelectAndOperate[ControlRelayOutputBlock](command, index, callback, config)
+        _log.debug("Completed selecting and operating...")
 
     def send_select_and_operate_command_set(self, command_set, callback=PrintingCommandResultCallback.Get(),
                                             config=opendnp3.TaskConfig.Default()):
@@ -285,27 +328,6 @@ class MasterApplication(IMasterApplication):
     def OnTaskStart(self, type, id):
         _log.debug('In MasterApplication.OnTaskStart')
 
-
-def collection_callback(result=None):
-    """
-    :type result: opendnp3.CommandPointResult
-    """
-    print("Header: {0} | Index:  {1} | State:  {2} | Status: {3}".format(
-        result.headerIndex,
-        result.index,
-        opendnp3.CommandPointStateToString(result.state),
-        opendnp3.CommandStatusToString(result.status)
-    ))
-
-
-def command_callback(result=None):
-    """
-    :type result: opendnp3.ICommandTaskResult
-    """
-    print("Received command result with summary: {}".format(opendnp3.TaskCompletionToString(result.summary)))
-    result.ForeachItem(collection_callback)
-
-
 def restart_callback(result=opendnp3.RestartOperationResult()):
     if result.summary == opendnp3.TaskCompletion.SUCCESS:
         print("Restart success | Restart Time: {}".format(result.restartTime.GetMilliseconds()))
@@ -319,7 +341,7 @@ def main():
     app = MyMaster(#log_handler=MyLogger(), # This is currently broken.  Not sure why at this point.
                    listener=AppChannelListener(),
                    #soe_handler=SOEHandler(), # This is currently broken for reasons highlighted above.
-                   master_application=MasterApplication()
+                   master_application=MasterApplication() # This isn't really baked yet
                    )
     _log.debug('Initialization complete. In command loop.')
     # Ad-hoc tests can be performed at this point. See master_cmd.py for examples.

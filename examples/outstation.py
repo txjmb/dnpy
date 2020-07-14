@@ -99,7 +99,7 @@ class OutstationApplication(IOutstationApplication):
                                                  self.listener)
 
         _log.debug('Adding the outstation to the channel.')
-        self.command_handler = OutstationCommandHandler()
+        self.command_handler = SuccessCommandHandler.Create() # OutstationCommandHandler()
         self.outstation = self.channel.AddOutstation("outstation", self.command_handler, self, self.stack_config)
 
         # Put the Outstation singleton in OutstationApplication so that it can be used to send updates to the Master.
@@ -113,7 +113,7 @@ class OutstationApplication(IOutstationApplication):
         """Set up the OpenDNP3 configuration."""
         stack_config = OutstationStackConfig(DatabaseConfig(10))
         stack_config.outstation.eventBufferConfig = EventBufferConfig().AllTypes(10)
-        stack_config.outstation.params.allowUnsolicited = True
+        stack_config.outstation.params.allowUnsolicited = False
         stack_config.link.LocalAddr = 1
         stack_config.link.RemoteAddr = 10
         stack_config.link.KeepAliveTimeout = TimeDuration().Max()
