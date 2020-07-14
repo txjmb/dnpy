@@ -66,3 +66,7 @@ cd cppyy
 python -m pip install . --upgrade
 ```
 
+# Testing
+setup_cppy.py loads the Allheaders.h file into cppyy and points cppyy to the built opendnp3 library
+
+The examples can be run from the examples directory.  These were adapted from the pydnp3 library.  They are not 100% functional as of yet, although most of the basic function has been tested.  Callbacks with templated functions are a challenge right now, for instance.  Users are welcome to document issues here in this repo.  If the issue appears to be one with cppyy, the developer there is very responsive and helpful:  [cppyy issues](https://bitbucket.org/wlav/cppyy/issues?status=new&status=open).  Assistance in getting the packaging process for the generated bindings to work so that a new wrapper repo can be created and published to PyPi would be very appreciated.
