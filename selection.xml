@@ -1,8 +1,13 @@
 <lcgdict>
     <selection>
         <!-- <class pattern="opendnp3::Opendnp3Gadget<*>"/>
-        <class name="opendnp3::Opendnp3Widget"/> -->
+        <class name="opendnp3Opendnp3Widget"/> -->
         <class pattern="opendnp3::*"/>
+        <class pattern="opendnp3*"/>
+        <variable pattern="opendnp3::*"/>
+        <variable pattern="opendnp3::levels::*"/>
+        <enum pattern="opendnp3::*"/>
+        <function pattern="opendnp3::*"/>
     </selection>        
     <exclusion>
     </exclusion>

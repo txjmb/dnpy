@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(dnpy3_cmake_build
         LANGUAGES CXX 
-        VERSION 0.1 
+        VERSION 0.2
         HOMEPAGE_URL "https://github.com/txjmb/dnpy"
         DESCRIPTION "cppyy-generated bindings for opendnp3")
 
@@ -92,4 +92,11 @@ install(TARGETS       opendnp3
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/opendnp3/
 )
 
-install(CODE "execute_process(COMMAND pip install ${PY_WHEEL_FILE})")
+#install(CODE "message(STATUS \"Attempting pip install\" ${PY_WHEEL_FILE})")
+
+install(CODE "message(STATUS \"Attempting pip install\" ${PY_WHEEL_FILE})"
+    CODE "execute_process(COMMAND pip install ${PY_WHEEL_FILE})"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+
+    
