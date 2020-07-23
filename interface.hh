@@ -5,11 +5,6 @@
 // template class opendnp3::Opendnp3Gadget<unsigned int>;
 // template class opendnp3::Opendnp3Gadget<float>;
 // template class opendnp3::Opendnp3Gadget<bool>;
-#ifndef PYOD3_ALLHEADERS_H
-#define PYOD3_ALLHEADERS_H
-#define ASIO_STANDALONE
-
-#include <stddef.h>
 
 // ---------- OPENDNP3 HEADERS ----------
 

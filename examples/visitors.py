@@ -6,13 +6,7 @@
     when it processes measurements received from the outstation.
 """
 import cppyy
-import setup_cppyy
-from cppyy.gbl import opendnp3
-from cppyy.gbl.opendnp3 import (
-    IVisitor,
-    Indexed,
-    Binary
-)
+from dnpy import opendnp3
 
 class VisitorIndexedBinary(IVisitor['opendnp3::Indexed<''opendnp3::Binary''>']):
     def __init__(self):
