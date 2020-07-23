@@ -1,0 +1,9 @@
+<lcgdict>
+    <selection>
+        <!-- <class pattern="opendnp3::Opendnp3Gadget<*>"/>
+        <class name="opendnp3::Opendnp3Widget"/> -->
+        <class pattern="opendnp3::*"/>
+    </selection>        
+    <exclusion>
+    </exclusion>
+</lcgdict>
