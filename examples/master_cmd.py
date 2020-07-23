@@ -3,9 +3,8 @@ import logging
 import sys
 
 from datetime import datetime
-import cppyy
-import setup_cppyy
-from cppyy.gbl import opendnp3
+
+from dnpy import opendnp3
 from master import MyMaster, MyLogger, AppChannelListener, MasterApplication
 from master import restart_callback
 
@@ -97,13 +96,13 @@ class MasterCmd(cmd.Cmd):
         """Send a DirectOperate BinaryOutput (group 12) index 5 LATCH_ON to the Outstation. Command syntax is: o1"""
         self.application.send_direct_operate_command(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON),
                                                      5,
-                                                     command_callback)
+                                                     self.application.command_callback)
 
     def do_o2(self, line):
         """Send a DirectOperate AnalogOutput (group 41) index 10 value 7 to the Outstation. Command syntax is: o2"""
         self.application.send_direct_operate_command(opendnp3.AnalogOutputInt32(7),
                                                      10,
-                                                     command_callback)
+                                                     self.application.command_callback)
 
     def do_o3(self, line):
         """Send a DirectOperate BinaryOutput (group 12) CommandSet to the Outstation. Command syntax is: o3"""
@@ -112,7 +111,7 @@ class MasterCmd(cmd.Cmd):
                 opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON), 0),
                 opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_OFF), 1)
             ]),
-            command_callback
+            self.application.command_callback
         )
 
         # This could also have been in multiple steps, as follows:
@@ -141,7 +140,7 @@ class MasterCmd(cmd.Cmd):
             [
                 opendnp3.WithIndex(opendnp3.ControlRelayOutputBlock(opendnp3.OperationType.LATCH_ON), 0)
             ]),
-            command_callback
+            self.application.command_callback
         )
 
     def do_scan_all(self, line):

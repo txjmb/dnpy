@@ -1,57 +1,10 @@
 import logging
 import sys
 import time
-import cppyy
-import setup_cppyy
-# import pdb
-# import cppyy.ll
-# cppyy.ll.set_signals_as_exception(True)
 
-from cppyy.gbl import opendnp3
-from cppyy.gbl.opendnp3 import ( 
-    levels, 
-    DNP3Manager, 
-    ConsoleLogger, 
-    ChannelRetry, 
-    IPEndpoint, 
-    PrintingChannelListener, 
-    MasterStackConfig, 
-    TimeDuration, 
-    PrintingSOEHandler, 
-    DefaultMasterApplication, 
-    HeaderInfo, 
-    ResponseInfo, 
-    ISOEHandler, 
-    ICollection, 
-    Indexed, 
-    Binary, 
-    DoubleBitBinary, 
-    Analog, 
-    Counter, 
-    FrozenCounter, 
-    BinaryOutputStatus, 
-    AnalogOutputStatus, 
-    OctetString, 
-    TimeAndInterval, 
-    BinaryCommandEvent, 
-    AnalogCommandEvent, 
-    DNPTime,
-    ClassField,
-    PrintingCommandResultCallback,
-    IChannelListener,
-    LogLevels,
-    ILogHandler,
-    UTCTimestamp,
-    IMasterApplication,
-    ICollection,
-    Indexed,
-    CommandSet,
-    ControlRelayOutputBlock,
-    TaskCompletionSpec,
-    CommandPointResult
-    )
-    
-FILTERS = levels.ALL | levels.ALL_APP_COMMS
+from dnpy import opendnp3
+
+FILTERS = opendnp3.levels.ALL | opendnp3.levels.ALL_APP_COMMS
 HOST = "127.0.0.1"
 LOCAL = "0.0.0.0"
 PORT = 20005
@@ -83,10 +36,10 @@ class MyMaster:
                   into outgoing messages.
     """
     def __init__(self,
-                 log_handler=ConsoleLogger(False).Create(),
-                 listener=PrintingChannelListener().Create(),
-                 soe_handler=PrintingSOEHandler().Create(),
-                 master_application=DefaultMasterApplication().Create(),
+                 log_handler=opendnp3.ConsoleLogger(False).Create(),
+                 listener=opendnp3.PrintingChannelListener().Create(),
+                 soe_handler=opendnp3.PrintingSOEHandler().Create(),
+                 master_application=opendnp3.DefaultMasterApplication().Create(),
                  stack_config=None):
 
         threads_to_allocate = 1
@@ -95,16 +48,16 @@ class MyMaster:
         self.listener = listener
         self.soe_handler = soe_handler
 
-        _log.debug('Creating a DNP3Manager.')
-        self.manager = DNP3Manager(threads_to_allocate, self.log_handler)
+        _log.debug('Creating a opendnp3.DNP3Manager..')
+        self.manager = opendnp3.DNP3Manager(threads_to_allocate, self.log_handler)
         _log.debug('Creating the DNP3 channel, a TCP client.')
-        self.channel = self.manager.AddTCPClient("tcpClient", FILTERS, ChannelRetry.Default(), {IPEndpoint(HOST, PORT)}, "0.0.0.0", PrintingChannelListener.Create())
+        self.channel = self.manager.AddTCPClient("tcpClient", FILTERS, opendnp3.ChannelRetry.Default(), {opendnp3.IPEndpoint(HOST, PORT)}, LOCAL, opendnp3.PrintingChannelListener.Create())
         
         self.master_application = master_application
         _log.debug('Configuring the DNP3 stack.')
         
-        self.stack_config = MasterStackConfig()
-        self.stack_config.master.responseTimeout = TimeDuration().Seconds(2)
+        self.stack_config = opendnp3.MasterStackConfig()
+        self.stack_config.master.responseTimeout = opendnp3.TimeDuration().Seconds(2)
         self.stack_config.link.LocalAddr = 10
         self.stack_config.link.RemoteAddr = 1
 
@@ -117,15 +70,15 @@ class MyMaster:
 
         # _log.debug('Configuring some scans (periodic reads).')
 
-        self.slow_scan = self.master.AddClassScan(ClassField.AllClasses(), TimeDuration.Minutes(30), self.soe_handler)
+        self.slow_scan = self.master.AddClassScan(opendnp3.ClassField.AllClasses(), opendnp3.TimeDuration.Minutes(30), self.soe_handler)
 
-        self.fast_scan = self.master.AddClassScan(ClassField(ClassField.CLASS_1), TimeDuration.Minutes(1), self.soe_handler)
+        self.fast_scan = self.master.AddClassScan(opendnp3.ClassField(opendnp3.ClassField.CLASS_1), opendnp3.TimeDuration.Minutes(1), self.soe_handler)
 
         _log.debug('Enabling the master. At this point, traffic will start to flow between the Master and Outstations.')
         self.master.Enable()
         time.sleep(1)
 
-    def send_direct_operate_command(self, command, index, callback=PrintingCommandResultCallback.Get(),
+    def send_direct_operate_command(self, command, index, callback=opendnp3.PrintingCommandResultCallback.Get(),
                                     config=opendnp3.TaskConfig.Default()):
         """
             Direct operate a single command
@@ -137,7 +90,7 @@ class MyMaster:
         """
         self.master.DirectOperate(command, index, callback, config)
 
-    def send_direct_operate_command_set(self, command_set, callback=PrintingCommandResultCallback.Get(),
+    def send_direct_operate_command_set(self, command_set, callback=opendnp3.PrintingCommandResultCallback.Get(),
                                         config=opendnp3.TaskConfig.Default()):
         """
             Direct operate a set of commands
@@ -155,7 +108,7 @@ class MyMaster:
         """
         print("Received Callback Command Result...")
 
-        print(f"Received command result with summary: {TaskCompletionSpec.to_human_string(result.summary)}")
+        print(f"Received command result with summary: {opendnp3.TaskCompletionSpec.to_human_string(result.summary)}")
 
         
         # printDetails = lambda res: (
@@ -187,7 +140,7 @@ class MyMaster:
         #     opendnp3.CommandStatusToString(result.status)
         # ))
 
-    def send_select_and_operate_command(self, command, index, callback=PrintingCommandResultCallback.Get(),
+    def send_select_and_operate_command(self, command, index, callback=opendnp3.PrintingCommandResultCallback.Get(),
                                         config=opendnp3.TaskConfig.Default()):
         """
             Select and operate a single command
@@ -198,10 +151,10 @@ class MyMaster:
         :param config: optional configuration that controls normal callbacks and allows the user to be specified for SA
         """
         _log.debug("Selecting and operating...")
-        self.master.SelectAndOperate[ControlRelayOutputBlock](command, index, callback, config)
+        self.master.SelectAndOperate[opendnp3.ControlRelayOutputBlock](command, index, callback, config)
         _log.debug("Completed selecting and operating...")
 
-    def send_select_and_operate_command_set(self, command_set, callback=PrintingCommandResultCallback.Get(),
+    def send_select_and_operate_command_set(self, command_set, callback=opendnp3.PrintingCommandResultCallback.Get(),
                                             config=opendnp3.TaskConfig.Default()):
         """
             Select and operate a set of commands
@@ -223,9 +176,9 @@ class MyMaster:
 SOEHandler does not currently work due to some issues with nested templates and Cppyy.  This is probably solvable with some help from Cppyy devs.
 '''
 
-# class SOEHandler(opendnp3.ISOEHandler):
+# class SOEHandler(opendnp3.opendnp3.ISOEHandler.):
 #     """
-#         Override ISOEHandler in this manner to implement application-specific sequence-of-events behavior.
+#         Override opendnp3.ISOEHandler. in this manner to implement application-specific sequence-of-events behavior.
 
 #         This is an interface for SequenceOfEvents (SOE) callbacks from the Master stack to the application layer.
 #     """
@@ -237,18 +190,18 @@ SOEHandler does not currently work due to some issues with nested templates and 
 #         """
 #             Process measurement data.
 
-#         :param info: HeaderInfo
+#         :param info: opendnp3.HeaderInfo.
 #         :param values: A collection of values received from the Outstation (various data types are possible).
 #         """
 #         visitor_class_types = {
-#             ICollection(Indexed(Binary)): VisitorIndexedBinary,
-#             opendnp3.ICollectionIndexedDoubleBitBinary: VisitorIndexedDoubleBitBinary,
-#             opendnp3.ICollectionIndexedCounter: VisitorIndexedCounter,
-#             opendnp3.ICollectionIndexedFrozenCounter: VisitorIndexedFrozenCounter,
-#             opendnp3.ICollectionIndexedAnalog: VisitorIndexedAnalog,
-#             opendnp3.ICollectionIndexedBinaryOutputStatus: VisitorIndexedBinaryOutputStatus,
-#             opendnp3.ICollectionIndexedAnalogOutputStatus: VisitorIndexedAnalogOutputStatus,
-#             opendnp3.ICollectionIndexedTimeAndInterval: VisitorIndexedTimeAndInterval
+#             opendnp3.ICollection.(opendnp3.Indexed.(opendnp3.Binary.)): Visitoropendnp3.Indexed.opendnp3.Binary.,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.opendnp3.DoubleBitopendnp3.Binary..: Visitoropendnp3.Indexed.opendnp3.DoubleBitopendnp3.Binary..,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.Counter: Visitoropendnp3.Indexed.Counter,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.opendnp3.FrozenCounter: Visitoropendnp3.Indexed.opendnp3.FrozenCounter,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.opendnp3.Analog: Visitoropendnp3.Indexed.opendnp3.Analog,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.opendnp3.Binary.OutputStatus: Visitoropendnp3.Indexed.opendnp3.Binary.OutputStatus,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.opendnp3.AnalogOutputStatus: Visitoropendnp3.Indexed.opendnp3.AnalogOutputStatus,
+#             opendnp3.opendnp3.ICollection.opendnp3.Indexed.opendnp3.TimeAndInterval: Visitoropendnp3.Indexed.opendnp3.TimeAndInterval
 #         }
 #         visitor_class = visitor_class_types[type(values)]
 #         visitor = visitor_class()
@@ -264,9 +217,9 @@ SOEHandler does not currently work due to some issues with nested templates and 
 #         _log.debug('In SOEHandler.EndFragment')
 
 
-class MyLogger(ILogHandler):
+class MyLogger(opendnp3.ILogHandler):
     """
-        Override ILogHandler in this manner to implement application-specific logging behavior.
+        Override opendnp3.ILogHandler in this manner to implement application-specific logging behavior.
     """
 
     def __init__(self):
@@ -276,7 +229,7 @@ class MyLogger(ILogHandler):
         pass
         #_log.debug('LOG\tentry={}'.format(message))
 
-class AppChannelListener(IChannelListener):
+class AppChannelListener(opendnp3.IChannelListener):
     """
         Override IChannelListener in this manner to implement application-specific channel behavior.
     """
@@ -294,7 +247,7 @@ class AppChannelListener(IChannelListener):
         _log.debug('In AppChannelListener.End')
 
 
-class MasterApplication(IMasterApplication):
+class MasterApplication(opendnp3.IMasterApplication):
     def __init__(self):
         super(MasterApplication, self).__init__()
 
@@ -322,7 +275,7 @@ class MasterApplication(IMasterApplication):
     def Now(self):
         _log.debug('In MasterApplication.Now')
 
-        return UTCTimestamp()
+        return opendnp3.UTCTimestamp()
 
     # Overridden method
     def OnTaskStart(self, type, id):

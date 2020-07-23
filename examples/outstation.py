@@ -2,36 +2,8 @@ import logging
 import sys
 import os
 import time
-time.sleep(2)
 
 from dnpy import opendnp3
-#from opendnp3 import (
-    #opendnp3.levels,
-    #opendnp3.IChannelListener,
-    #opendnp3.ILogHandler,
-    #opendnp3.ConsoleLogger,
-    #opendnp3.DNP3Manager,
-    #opendnp3.ChannelRetry,
-    #opendnp3.ServerAcceptMode,
-    #opendnp3.TimeDuration,
-    #opendnp3.PrintingChannelListener,
-    #opendnp3.IPEndpoint,
-    #opendnp3.ICommandHandler,
-    #opendnp3.IOutstationApplication,
-    #opendnp3.DatabaseConfig,
-    #opendnp3.EventBufferConfig,
-    #opendnp3.OutstationStackConfig,
-    #opendnp3.BinaryConfig,
-    #opendnp3.AnalogConfig,
-    #opendnp3.PointClass,
-    #opendnp3.StaticAnalogVariation,
-    #opendnp3.StaticBinaryVariation,
-    #opendnp3.EventAnalogVariation,
-    #opendnp3.EventBinaryVariation,
-    #opendnp3.SuccessCommandHandler,
-    #opendnp3.UpdateBuilder,
-    #opendnp3.RestartMode
-#)
 
 LOG_LEVELS = opendnp3.levels.NORMAL | opendnp3.levels.ALL_COMMS
 LOCAL_IP = "0.0.0.0"

@@ -20,15 +20,6 @@ opendnp3 is included in the repo as a submodule
 git submodule update --recursive --remote
 ```
 
-### build it:
-```
-cd deps/opendnp3
-mkdir build
-cd build
-cmake ..
-make -j
-```
-
 ## Latest **cppyy** (1.8 as of last writing)
 You can [install](https://cppyy.readthedocs.io/en/latest/installation.html) cppyy in a number of ways, including through conda forge.  You can also [build from source](https://cppyy.readthedocs.io/en/latest/repositories.html).  It's probably not a bad idea to build from source at least once to become familiar with the way cppyy works and its dependencies.
 
@@ -66,8 +57,18 @@ cd cppyy
 python -m pip install . --upgrade
 ```
 
+### build and install dnpy and opendnp3 package
+```
+mkdir build
+cd build
+cmake ..
+make -j
+make install
+cd ..
+pip install build/dist/dnpy-0.2-py3-none-linux_x86_64.whl
+```
+
 # Testing/running
-setup_cppy.py loads the Allheaders.h file into cppyy and points cppyy to the built opendnp3 library.
 
 The examples can be run from the examples directory.  There is a master and an outstation example, with each having a \_cmd.py wrapper for interactive testing.  These were adapted from the pydnp3 library.  
 
