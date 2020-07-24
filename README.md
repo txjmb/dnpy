@@ -9,7 +9,7 @@ Pydnp3 uses pybind11 to wrap the c++ classes.  Unfortunately, pydnp3 has gone ve
 
 When a new version of opendnp3 comes out with api changes, such as the recent much-improved 3.x versions, it is a simple matter to update any project to use the new c++ code, with very little to no code changes for the bindings, although Python code may need to change to reflect API changes, and some pythonizations may be desired.
 
-There is a memory cost to the cppyy approach.  One can expect around a ~100MB overhead.  If that's a problem, another approach may work better.  There are a lot of perhaps unexpected benefits to using cppyy that should be considered, all in all.  It would be a good idea to read [philosophy](https://cppyy.readthedocs.io/en/latest/philosophy.html) behind cppyy to understand all of the pros and cons.
+There is a memory cost to the cppyy approach.  One can expect around a ~100MB overhead.  If that's a problem for a particular project, another approach may work better.  There are a lot of perhaps unexpected benefits to using cppyy that should be considered.  It would be a good idea to read [philosophy](https://cppyy.readthedocs.io/en/latest/philosophy.html) behind cppyy to understand all of the pros and cons.
 
 Currently, this project has not been set up to install the cppyy wrapper as a package.  This will be abstracted out into a separate project called cppyy-opendnp3 soon.  In the meantime, this project does runtime generation of the wrapper, so there is a minor startup speed cost.
 
