@@ -1,5 +1,5 @@
 # dnpy
-A Python wrapper around the excellent [opendnp3](https://github.com/dnp3/opendnp3) project using [Cppyy](https://cppyy.readthedocs.io/en/latest/index.html). Cppyy source can be found here:  [cppyy](https://bitbucket.org/wlav/cppyy/src/master/). The project template comes from [camillescott's cookiecutter recipe](https://github.com/camillescott/cookiecutter-cppyy-cmake).  More info on the templating/packaging is later in this README.
+A Python wrapper around the excellent [opendnp3](https://github.com/dnp3/opendnp3) project using [Cppyy](https://cppyy.readthedocs.io/en/latest/index.html). Cppyy source can be found here:  [cppyy](https://bitbucket.org/wlav/cppyy/src/master/). The project template comes from [camillescott's cookiecutter recipe](https://github.com/camillescott/cookiecutter-cppyy-cmake).  More info on the templating/packaging can be found later in this README.
 
 The opendnp3 library includes wrappers for Java and .NET Framework (not .NET Core/Standard yet) within the repo.  Several years ago, Chargepoint developed a wrapper for Python as a separate project called [pydnp3](https://github.com/ChargePoint/pydnp3).
 
