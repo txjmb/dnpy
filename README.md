@@ -74,14 +74,7 @@ pip install build/dist/dnpy-0.2-py3-none-linux_x86_64.whl
 
 The examples can be run from the examples directory.  There is a master and an outstation example, with each having a \_cmd.py wrapper for interactive testing.  These were adapted from the pydnp3 library.  
 
-They are not 100% functional as of yet, although most of the basic functions have been tested.  Callbacks with templated functions are the main challenge right now.  Users are welcome to document issues here in this repo.  If the issue appears to be one with cppyy, the developer there is very responsive and helpful:  [cppyy issues](https://bitbucket.org/wlav/cppyy/issues?status=new&status=open).  Assistance in getting the packaging process for the generated bindings to work so that a new wrapper repo can be created and published to PyPi would be very appreciated.  Info on packaging using CMake is available [here](https://cppyy.readthedocs.io/en/latest/cmake_interface.html).  Example repos and articles related to packaging using CMake for those who want to try to figure this out:
-
-* https://github.com/camillescott/cookiecutter-cppyy-cmake
-* https://www.camillescott.org/2019/04/11/cmake-cppyy/
-* https://gitlab.com/coopr/coek/tree/cppyy
-* https://github.com/camillescott/cppyy-bbhash
-* https://bitbucket.org/wlav/cppyy/issues/76/binding-generation-issue-on-ubuntu1604
-* https://github.com/camillescott/cppyy-knn
+They are not 100% functional as of yet, although most of the basic functions have been tested.  Callbacks with templated functions are the main challenge right now.  Users are welcome to document issues here in this repo.  If the issue appears to be one with cppyy, the developer there is very responsive and helpful:  [cppyy issues](https://bitbucket.org/wlav/cppyy/issues?status=new&status=open).
 
 [![Build Status](https://travis-ci.org/txjmb/cppyy_opendnp3.svg?branch=master)](https://travis-ci.org/txjmb/cppyy_opendnp3)
 
