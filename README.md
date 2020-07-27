@@ -1,9 +1,9 @@
 # dnpy
-A Python wrapper around the excellent [opendnp3](https://github.com/dnp3/opendnp3) project using [Cppyy](https://cppyy.readthedocs.io/en/latest/index.html).
+A Python wrapper around the excellent [opendnp3](https://github.com/dnp3/opendnp3) project using [Cppyy](https://cppyy.readthedocs.io/en/latest/index.html). Cppyy source can be found here:  [cppyy](https://bitbucket.org/wlav/cppyy/src/master/). The project template comes from [camillescott's cookiecutter recipe](https://github.com/camillescott/cookiecutter-cppyy-cmake).  More info on the templating/packaging is later in this README.
 
-The opendnp library includes wrappers for Java and .NET Framework (not .NET Core/Standard yet) within the repo.  Several years ago, Chargepoint developed a wrapper for Python as a separate project called [pydnp3](https://github.com/ChargePoint/pydnp3).
+The opendnp3 library includes wrappers for Java and .NET Framework (not .NET Core/Standard yet) within the repo.  Several years ago, Chargepoint developed a wrapper for Python as a separate project called [pydnp3](https://github.com/ChargePoint/pydnp3).
 
-Pydnp3 uses pybind11 to wrap the c++ classes.  Unfortunately, pydnp3 has gone very stale and is limited by the capabilities of pybind11, that have caused some unfortunate lack of functionality.
+Pydnp3 uses pybind11 to wrap the c++ classes.  Unfortunately, pydnp3 has gone very stale and is limited by the capabilities of pybind11 (as implemented), that have caused some unfortunate lack of functionality.
 
 [dnpy](https://github.com/txjmb/dnpy) seeks to wrap the opendnp3 library using a different approach, namely the wonderful [Cppyy](https://cppyy.readthedocs.io/en/latest/index.html) project.  Cppyy offers a number of advantages over pybind11.  It is actively developed by members of the CERN team (Wim Lavrijsen primary developer) for high energy physics projects, and dynamically generates wrappers by inspecting header files, rather than custom coding of wrapper classes.  It can handle modern c++ language and compiler features and has a number of performance enhancements that make it superior to pybind11 in many ways.  It is also compatible with PyPy.
 
@@ -78,8 +78,7 @@ They are not 100% functional as of yet, although most of the basic functions hav
 
 [![Build Status](https://travis-ci.org/txjmb/cppyy_opendnp3.svg?branch=master)](https://travis-ci.org/txjmb/cppyy_opendnp3)
 
-This project is set of Python bindings for opendnp3 using
-[cppyy](https://bitbucket.org/wlav/cppyy/src/master/). The project template comes from [camillescott's cookiecutter recipe](https://github.com/camillescott/cookiecutter-cppyy-cmake), in which the CMake sources are based on the bundled cppyy CMake modules, with a number of improvements and changes:
+As stated earlier, the project template comes from [camillescott's cookiecutter recipe](https://github.com/camillescott/cookiecutter-cppyy-cmake), in which the CMake sources are based on the bundled cppyy CMake modules, with a number of improvements and changes:
 
 - `genreflex` and a selection XML are use instead of a direct `rootcling` invocation. This makes
     name selection much easier.
