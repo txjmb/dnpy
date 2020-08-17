@@ -27,6 +27,9 @@ You can [install](https://cppyy.readthedocs.io/en/latest/installation.html) cppy
 
 Briefly, here's how you build from source (although you should always reference cppyy docs).
 
+### cppyy dependencies
+conda install setuptools
+
 ### cling (from cppyy-backend repo)
 ```
 git clone https://bitbucket.org/wlav/cppyy-backend.git
