@@ -1,10 +1,6 @@
-//#include <stddef.h>
-//#include "AllHeaders.h"
-
-// template class opendnp3::Opendnp3Gadget<int>;
-// template class opendnp3::Opendnp3Gadget<unsigned int>;
-// template class opendnp3::Opendnp3Gadget<float>;
-// template class opendnp3::Opendnp3Gadget<bool>;
+#ifndef PYOD3_ALLHEADERS_H
+#define PYOD3_ALLHEADERS_H
+#define ASIO_STANDALONE
 
 // ---------- OPENDNP3 HEADERS ----------
 
@@ -182,4 +178,4 @@
 #include "deps/opendnp3/cpp/lib/include/opendnp3/util/Uncopyable.h"
 #include "deps/opendnp3/cpp/lib/include/opendnp3/util/UTCTimestamp.h"
 
-//#endif
+#endif

@@ -4,7 +4,8 @@ import os
 import time
 
 from dnpy import opendnp3
-
+import cppyy.ll
+cppyy.ll.set_signals_as_exception(True)
 LOG_LEVELS = opendnp3.levels.NORMAL | opendnp3.levels.ALL_COMMS
 LOCAL_IP = "0.0.0.0"
 PORT = 20005
@@ -47,20 +48,6 @@ class OutstationApplication(opendnp3.IOutstationApplication):
 
     def __init__(self):
         super(OutstationApplication, self).__init__()
-
-        _log.debug('Configuring the DNP3 stack.')
-        self.stack_config = self.configure_stack()
-
-        _log.debug('Configuring the outstation database.')
-        self.configure_database(self.stack_config.database)
-
-        _log.debug('Creating a opendnp3.DNP3Manager.')
-        threads_to_allocate = 1
-
-        self.log_handler = opendnp3.ConsoleLogger(False).Create()              # (or use this during regression testing)
-        self.manager = opendnp3.DNP3Manager(threads_to_allocate, self.log_handler)
-        self.server_accept_mode = opendnp3.ServerAcceptMode.CloseNew
-
         _log.debug('Creating the DNP3 channel, a TCP server.')
         self.retry_parameters = opendnp3.ChannelRetry(opendnp3.TimeDuration.Seconds(1), opendnp3.TimeDuration.Seconds(300)).Default()
 

@@ -17,12 +17,18 @@
 # Python support for clang might not be available for Python3. We need to
 # find what we have.
 #
+include(CMakePrintHelpers)
+
 find_library(LibClang_LIBRARY libclang.so PATH_SUFFIXES $ENV{CONDA_PREFIX}/lib x86_64-linux-gnu)
+cmake_print_variables(LibClang_LIBRARY)
+message(STATUS "FOO!")
 function(_find_libclang_python python_executable)
     #
     # Prefer python3 explicitly or implicitly over python2.
     #
     foreach(exe IN ITEMS python3 python python2)
+        cmake_print_variables(LibClang_LIBRARY)
+        message(NOTICE "BAR!")
         execute_process(
             COMMAND ${exe} -c "from clang.cindex import Config; Config.set_library_file(\"${LibClang_LIBRARY}\"); Config().lib"
             ERROR_VARIABLE _stderr
